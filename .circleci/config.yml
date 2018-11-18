@@ -1,0 +1,15 @@
+version: 2
+executorType: machine
+jobs:
+  build:
+    working_directory: ~/rcj-go
+    steps:
+      - checkout
+      - run:
+          name: Docker Build
+          command: 'docker build .'
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build

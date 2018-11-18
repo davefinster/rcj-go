@@ -1,0 +1,6 @@
+vendor
+credential.json
+rcj-go
+kube.yml
+config.json
+main

@@ -1,0 +1,388 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+message Division {
+  string id = 1;
+  string name = 2;
+  enum League {
+    ONSTAGE = 0;
+    RESCUE = 1;
+    SOCCER = 2;
+  }
+  League league = 3;
+  int32 competition_rounds = 4;
+  int32 final_rounds = 5;
+  string interview_template_id = 6;
+  string performance_template_id = 7;
+}
+
+message Institution {
+  string id = 1;
+  string name = 2;
+}
+
+message Member {
+  string id = 1;
+  string name = 2;
+  enum Gender {
+    UNSPECIFIED = 0;
+    MALE = 1;
+    FEMALE = 2;
+  }
+  Gender gender = 3;
+}
+
+message Team {
+  string id = 1;
+  string name = 2;
+  Institution institution = 3;
+  string division = 4;
+  string import_id = 5;
+  repeated Member members = 6;
+}
+
+message GetDivisionsRequest {
+
+}
+
+message GetDivisionsResponse {
+  repeated Division divisions = 1;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+  string username = 3;
+  bool is_admin = 4;
+  string password = 5;
+}
+
+message GetUsersRequest {
+
+}
+
+message GetUsersResponse {
+  repeated User users = 1;
+}
+
+message ScoreSheetTemplateSection {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  int32 max_value = 4;
+  int32 multiplier = 5;
+  int32 display_order = 6;
+}
+
+message ScoreSheetTemplate {
+  string id = 1;
+  string name = 2;
+  enum Type {
+    INTERVIEW = 0;
+    PERFORMANCE = 1;
+  }
+  Type type = 3;
+  repeated string timings = 4;
+  repeated ScoreSheetTemplateSection sections = 5;
+}
+
+message GetScoreSheetTemplatesRequest {
+  message QueryParameters {
+    repeated string id = 1;
+  }
+  QueryParameters filter = 1;
+  bool populate_sections = 2;
+}
+
+message GetScoreSheetTemplatesResponse {
+  repeated ScoreSheetTemplate score_sheet_templates = 1;
+}
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  User authenticated_user = 1;
+}
+
+message GetCurrentUserRequest {
+
+}
+
+message GetCurrentUserResponse {
+  User authenticated_user = 1;
+}
+
+message DivisionLadder {
+  Division division = 1;
+  message LadderEntry {
+    Team team = 1;
+    message RoundAverage {
+      int32 round = 1;
+      double average = 2;
+      int32 count = 3;
+    }
+    repeated RoundAverage rounds = 2;
+    double interview_score = 3;
+    double best_round = 4;
+    double best_final = 5;
+    double round_total = 6;
+    double final_total = 7;
+  }
+  repeated LadderEntry ladder = 2;
+}
+
+message GetDanceLadderRequest {
+  bool show_all = 1;
+}
+
+message GetDanceLadderResponse {
+  repeated DivisionLadder divisions = 1;
+}
+
+message GetDivisionRequest {
+  string division_id = 1;
+  bool include_teams = 2;
+  bool include_templates = 3;
+}
+
+message GetDivisionResponse {
+  Division division = 1;
+  repeated Team teams = 2;
+  repeated ScoreSheetTemplate templates = 3;
+}
+
+message ScoreSheetSection {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  int32 max_value = 4;
+  int32 multiplier = 5;
+  string section_id = 6;
+  double value = 7;
+}
+
+message ScoreSheet {
+  string id = 1;
+  string comments = 2;
+  int32 round = 3;
+  Team team = 4;
+  User author = 5;
+  repeated ScoreSheetSection sections = 6;
+  message Timing {
+    string name = 1;
+    string value = 2;
+  }
+  repeated Timing timings = 7;
+  ScoreSheetTemplate.Type type = 8;
+  string score_sheet_template_id = 9;
+  string division_id = 10;
+  double total = 11;
+}
+
+message Checkin {
+  string id = 1;
+  Team team = 2;
+  User agent = 3;
+  string comments = 4;
+  google.protobuf.Timestamp in_time = 5;
+}
+
+message GetScoreSheetRequest {
+  string score_sheet_id = 1;
+}
+
+message GetScoreSheetResponse {
+  ScoreSheet score_sheet = 1;
+}
+
+message CreateScoreSheetRequest {
+  ScoreSheet score_sheet = 1;
+}
+
+message CreateScoreSheetResponse {
+  ScoreSheet score_sheet = 1;
+}
+
+message UpdateScoreSheetRequest {
+  ScoreSheet score_sheet = 1;
+}
+
+message UpdateScoreSheetResponse {
+  ScoreSheet score_sheet = 1;
+}
+
+message GetTeamRequest {
+  string team_id = 1;
+  bool include_score_sheets = 2;
+}
+
+message GetTeamResponse {
+  Team team = 1;
+  Division division = 2;
+  repeated ScoreSheet score_sheets = 3;
+}
+
+message CreateTeamRequest {
+  Team team = 1;
+}
+
+message CreateTeamResponse {
+  Team team = 1;
+}
+
+message GetInstitutionsRequest {
+  string search_string = 1;
+}
+
+message GetInstitutionsResponse {
+  repeated Institution institutions = 1;
+}
+
+message UpdateTeamRequest {
+  Team team = 1;
+}
+
+message UpdateTeamResponse {
+  Team team = 1;
+}
+
+message GetTeamsRequest {
+  bool populate_members = 1;
+}
+
+message GetTeamsResponse {
+  repeated Team teams = 1;
+}
+
+message CreateDivisionRequest {
+  Division division = 1;
+}
+
+message CreateDivisionResponse {
+  Division division = 1;
+}
+
+message CreateScoreSheetTemplateRequest {
+  ScoreSheetTemplate score_sheet_template = 1;
+}
+
+message CreateScoreSheetTemplateResponse {
+  ScoreSheetTemplate score_sheet_template = 1;
+}
+
+message CreateUserRequest {
+  User user = 1;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+message UpdateUserRequest {
+  User user = 1;
+}
+
+message UpdateUserResponse {
+  User user = 1;
+}
+
+message GetCheckinsRequest {
+
+}
+
+message GetCheckinsResponse {
+  repeated Checkin check_ins = 1;
+}
+
+message CreateCheckinRequest {
+  Checkin check_in = 1;
+}
+
+message CreateCheckinResponse {
+  Checkin check_in = 1;
+}
+
+message GetScoreSheetsRequest {
+  bool current_user = 1;
+}
+
+message GetScoreSheetsResponse {
+  repeated ScoreSheet score_sheets = 1;
+}
+
+message GetSheetTeamsRequest {
+
+}
+
+message GetSheetTeamsResponse {
+  repeated Team teams = 1;
+}
+
+message SyncCheckinsRequest {
+
+}
+
+message SyncCheckinsResponse {
+
+}
+
+message GetSheetAuthUrlRequest {
+
+}
+
+message GetSheetAuthUrlResponse {
+  string url = 1;
+}
+
+message GetSheetConfigRequest {
+
+}
+
+message GetSheetConfigResponse {
+  string ingestion_spreadsheet_id = 1;
+  string push_spreadsheet_id = 2;
+}
+
+message SubmitSheetConfigRequest {
+  string code = 1;
+  string ingestion_spreadsheet_id = 2;
+  string push_spreadsheet_id = 3;
+}
+
+message SubmitSheetConfigResponse {
+
+}
+
+service Robocup {
+  rpc Login(LoginRequest) returns (LoginResponse) {}
+  rpc GetCurrentUser(GetCurrentUserRequest) returns (GetCurrentUserResponse) {}
+  rpc GetDanceLadder(GetDanceLadderRequest) returns (GetDanceLadderResponse) {}
+  rpc GetDivision(GetDivisionRequest) returns (GetDivisionResponse) {}
+  rpc GetScoreSheet(GetScoreSheetRequest) returns (GetScoreSheetResponse) {}
+  rpc CreateScoreSheet(CreateScoreSheetRequest) returns (CreateScoreSheetResponse) {}
+  rpc UpdateScoreSheet(UpdateScoreSheetRequest) returns (UpdateScoreSheetResponse) {}
+  rpc GetDivisions(GetDivisionsRequest) returns (GetDivisionsResponse) {}
+  rpc GetUsers(GetUsersRequest) returns (GetUsersResponse) {}
+  rpc GetScoreSheetTemplates(GetScoreSheetTemplatesRequest) returns (GetScoreSheetTemplatesResponse) {}
+  rpc GetTeam(GetTeamRequest) returns (GetTeamResponse) {}
+  rpc CreateTeam(CreateTeamRequest) returns (CreateTeamResponse) {}
+  rpc GetInstitutions(GetInstitutionsRequest) returns (GetInstitutionsResponse) {}
+  rpc UpdateTeam(UpdateTeamRequest) returns (UpdateTeamResponse) {}
+  rpc GetTeams (GetTeamsRequest) returns (GetTeamsResponse) {}
+  rpc CreateDivision (CreateDivisionRequest) returns (CreateDivisionResponse) {}
+  rpc CreateScoreSheetTemplate (CreateScoreSheetTemplateRequest) returns (CreateScoreSheetTemplateResponse) {}
+  rpc CreateUser (CreateUserRequest) returns (CreateUserResponse) {}
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse) {}
+  rpc GetCheckins (GetCheckinsRequest) returns (GetCheckinsResponse) {}
+  rpc CreateCheckin (CreateCheckinRequest) returns (CreateCheckinResponse) {}
+  rpc GetScoreSheets (GetScoreSheetsRequest) returns (GetScoreSheetsResponse) {}
+  rpc GetSheetTeams (GetSheetTeamsRequest) returns (GetSheetTeamsResponse) {}
+  rpc SyncCheckins (SyncCheckinsRequest) returns (SyncCheckinsResponse) {}
+  rpc GetSheetAuthUrl (GetSheetAuthUrlRequest) returns (GetSheetAuthUrlResponse) {}
+  rpc GetSheetConfig (GetSheetConfigRequest) returns (GetSheetConfigResponse) {}
+  rpc SubmitSheetConfig (SubmitSheetConfigRequest) returns (SubmitSheetConfigResponse) {}
+}

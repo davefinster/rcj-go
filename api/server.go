@@ -1093,42 +1093,40 @@ func (s *robocupGrpcServer) GetSheetTeams(ctx context.Context, req *serv.GetShee
 	}, nil
 }
 
-func (s *Server) AuthenticateRPC() func(context.Context) (context.Context, error) {
-	return func(ctx context.Context) (context.Context, error) {
-		psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
-		meta, _ := metadata.FromIncomingContext(ctx)
-		url := meta.Get("x-original-uri")
-		if url[0] == "/Robocup/Login" {
-			return ctx, nil
-		}
-		userId := ""
-		rawCookieSet := meta.Get("cookie")
-		if len(rawCookieSet) > 0 {
-			rawCookies := rawCookieSet[0]
-			header := http.Header{}
-			header.Add("Cookie", rawCookies)
-			request := http.Request{Header: header}
-			cook, err := request.Cookie("rcj-auth")
-			if cook != nil && err == nil {
-				userId = cook.Value
-			}
-		}
-		if userId == "" {
-			return nil, grpc.Errorf(codes.Unauthenticated, "Not logged in")
-		}
-		sql, args, _ := psql.Select("id", "name", "username", "is_admin").
-			From("users").Where(sq.Eq{"id": userId}).ToSql()
-		var users []fullUser
-		err := s.DB.Select(&users, sql, args...)
-		if err != nil {
-			return nil, grpc.Errorf(codes.Internal, "Error: %+v", err)
-		}
-		if len(users) == 0 {
-			return nil, grpc.Errorf(codes.Unauthenticated, "User id not found")
-		}
-		userIdMeta := metadata.Pairs("user-id", userId)
-		return metadata.NewIncomingContext(ctx, metadata.Join(meta, userIdMeta)), nil
+func (s *robocupGrpcServer) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
+	fmt.Printf("%+v %+v", ctx, fullMethodName)
+	if fullMethodName == "/Robocup/Login" {
+		return ctx, nil
 	}
+	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
+	meta, _ := metadata.FromIncomingContext(ctx)
+	userId := ""
+	rawCookieSet := meta.Get("cookie")
+	if len(rawCookieSet) > 0 {
+		rawCookies := rawCookieSet[0]
+		header := http.Header{}
+		header.Add("Cookie", rawCookies)
+		request := http.Request{Header: header}
+		cook, err := request.Cookie("rcj-auth")
+		if cook != nil && err == nil {
+			userId = cook.Value
+		}
+	}
+	if userId == "" {
+		return nil, grpc.Errorf(codes.Unauthenticated, "Not logged in")
+	}
+	sql, args, _ := psql.Select("id", "name", "username", "is_admin").
+		From("users").Where(sq.Eq{"id": userId}).ToSql()
+	var users []fullUser
+	err := s.Store.DB.Select(&users, sql, args...)
+	if err != nil {
+		return nil, grpc.Errorf(codes.Internal, "Error: %+v", err)
+	}
+	if len(users) == 0 {
+		return nil, grpc.Errorf(codes.Unauthenticated, "User id not found")
+	}
+	userIdMeta := metadata.Pairs("user-id", userId)
+	return metadata.NewIncomingContext(ctx, metadata.Join(meta, userIdMeta)), nil
 }
 
 type ServerConfig struct {
@@ -1168,7 +1166,7 @@ func (s *Server) Start() error {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(s.AuthenticateRPC())),
+		grpc.UnaryInterceptor(grpc_auth.UnaryServerInterceptor(nil)),
 	)
 	sheets := sheetStore.NewSheetStore(config.AppSecretPath)
 	sheets.DB = dbObj

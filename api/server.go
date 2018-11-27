@@ -1094,7 +1094,6 @@ func (s *robocupGrpcServer) GetSheetTeams(ctx context.Context, req *serv.GetShee
 }
 
 func (s *robocupGrpcServer) AuthFuncOverride(ctx context.Context, fullMethodName string) (context.Context, error) {
-	fmt.Printf("%+v %+v", ctx, fullMethodName)
 	if fullMethodName == "/Robocup/Login" {
 		return ctx, nil
 	}

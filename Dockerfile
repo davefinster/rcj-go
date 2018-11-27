@@ -3,7 +3,7 @@ WORKDIR /go/src/github.com/davefinster/rcj-go
 COPY . .
 RUN curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh && \
     dep ensure -v && \
-    go build -a -v main.go
+    GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -a -v main.go
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates

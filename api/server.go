@@ -1180,6 +1180,7 @@ func (s *Server) Start() error {
 	wrapped := grpcweb.WrapServer(grpcServer)
 	s.Engine = gin.Default()
 	s.Engine.Use(gRPCMiddleware(wrapped))
+	s.Engine.GET("/healthz", s.getHealth)
 	authorised := s.Engine.Group("/api", s.Authenticate())
 	authorised.GET("/division/:id/excel", s.getScoreSheetExcelForDivision)
 	authorised.GET("/team/:id/excel", s.getScoreSheetExcel)

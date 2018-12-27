@@ -1136,6 +1136,10 @@ type ServerConfig struct {
 
 var config ServerConfig
 
+func (s *Server) getHealth(c *gin.Context) {
+	c.JSON(200, gin.H{})
+}
+
 // Start boots the RobocupServer
 func (s *Server) Start() error {
 	filePath := os.Getenv("RCJ_CONFIG_PATH")

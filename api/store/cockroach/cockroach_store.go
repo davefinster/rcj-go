@@ -1015,7 +1015,7 @@ func (s *CockroachStore) FetchDivisions(ctx context.Context, txx *sqlx.Tx) ([]*r
 func (s *CockroachStore) innerCreateTeam(txx *sqlx.Tx, team *rcjpb.Team) (string, error) {
 	institutionID := ""
 	if team.Institution.GetId() == "" {
-		instSql, instArgs, _ := s.PSQL.Insert("institutions").Columns("names").Values(team.Institution.GetName()).Suffix("RETURNING \"id\"").ToSql()
+		instSql, instArgs, _ := s.PSQL.Insert("institutions").Columns("name").Values(team.Institution.GetName()).Suffix("RETURNING \"id\"").ToSql()
 		instRows, instErr := txx.Query(instSql, instArgs...)
 		if instErr != nil {
 			return "", instErr
